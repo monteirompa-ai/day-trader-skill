@@ -38,6 +38,17 @@ Other flags: `--flat-by 15:55`, `--json`, `--now "2026-10-19 10:15"` (New
 York time), `--entry PRICE` with a waiting entry.json to plan ahead, `--setup
 level`, `--offline FILE` (a saved Yahoo chart JSON for an ATR stop).
 
+
+## Language and time zone
+
+Reply in the user's language (European Portuguese for a user in Portugal),
+keeping tickers, order types and tool output as they are. The tools print New
+York time. For a user in Portugal, give the Lisbon time next to it; run
+`python3 "${CLAUDE_SKILL_DIR}/../trader-alerts/alerts.py" clock --json` (fields `now_lisbon`,
+`opens_lisbon`, `closes_lisbon`, `lisbon_ahead_hours`) rather than adding 5
+hours by hand, because for a few weeks in March and in late October and early
+November the gap is 4 hours.
+
 ## What it reads and writes
 
 | file | what |
