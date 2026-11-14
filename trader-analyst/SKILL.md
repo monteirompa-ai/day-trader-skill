@@ -32,6 +32,17 @@ It needs the SEC User-Agent (`sec_user_agent` in `trader/config.json`, or
 `SEC_USER_AGENT`): "Your Name you@example.com" with the user's real name and
 email. It refuses to call SEC without one.
 
+
+## Language and time zone
+
+Reply in the user's language (European Portuguese for a user in Portugal),
+keeping tickers, order types and tool output as they are. The tools print New
+York time. For a user in Portugal, give the Lisbon time next to it; run
+`python3 "${CLAUDE_SKILL_DIR}/../trader-alerts/alerts.py" clock --json` (fields `now_lisbon`,
+`opens_lisbon`, `closes_lisbon`, `lisbon_ahead_hours`) rather than adding 5
+hours by hand, because for a few weeks in March and in late October and early
+November the gap is 4 hours.
+
 ## What it reads and writes
 
 - Reads `https://data.sec.gov/api/xbrl/companyfacts/CIK##########.json` (every

@@ -16,7 +16,7 @@ alerts = load("trader-alerts", "alerts")
 QDIR = os.path.join(FIX, "trader-alerts")
 PLAN = os.path.join(FIX, "trader-budget", "plan-tsla.json")
 DT = datetime.datetime
-UA = "Mozilla/5.0 (compatible; day-trader-skill/2.0; +https://github.com/Jakeschincariol/day-trader-skill)"
+UA = "Mozilla/5.0 (compatible; day-trader-skill/2.0; +https://github.com/monteirompa-ai/day-trader-skill)"
 
 # NYSE holidays as published at https://www.nyse.com/markets/hours-calendars (read 2026-10-13)
 NYSE_2026 = ["2026-01-01", "2026-01-19", "2026-02-16", "2026-04-03", "2026-05-25", "2026-06-19",
@@ -84,6 +84,27 @@ class Calendar(unittest.TestCase):
         self.assertTrue(alerts.market_status(ny("2027-12-31T10:00"))["open"])
         self.assertEqual(alerts.market_status(ny("2026-10-17T10:00"))["reason"], "weekend")
         self.assertFalse(alerts.market_status(ny("2028-03-01T10:00"))["calendar_known"])
+
+    def test_lisbon_time(self):
+        # EU summer time 2026: 29 March to 25 October; US: 8 March to 1 November
+        self.assertEqual(alerts.lisbon_offset(DT(2026, 3, 29, 0, 59)), 0)
+        self.assertEqual(alerts.lisbon_offset(DT(2026, 3, 29, 1, 0)), 1)
+        self.assertEqual(alerts.lisbon_offset(DT(2026, 10, 25, 0, 59)), 1)
+        self.assertEqual(alerts.lisbon_offset(DT(2026, 10, 25, 1, 0)), 0)
+        usual = alerts.market_status(ny("2026-10-19 10:15"))
+        self.assertEqual(usual["now_lisbon"], "2026-10-19 15:15")
+        self.assertEqual((usual["opens_lisbon"], usual["closes_lisbon"]), ("14:30", "21:00"))
+        self.assertEqual(usual["lisbon_ahead_hours"], 5)
+        autumn = alerts.market_status(ny("2026-10-26 08:00"))   # EU back on winter time, US not yet
+        self.assertEqual(autumn["lisbon_ahead_hours"], 4)
+        self.assertEqual((autumn["opens_lisbon"], autumn["closes_lisbon"]), ("13:30", "20:00"))
+        self.assertEqual(autumn["next_open_lisbon"], "2026-10-26 13:30")
+        spring = alerts.market_status(ny("2026-03-10 09:00"))   # US on summer time, EU not yet
+        self.assertEqual(spring["opens_lisbon"], "13:30")
+        winter = alerts.market_status(ny("2026-12-01 10:00"))
+        self.assertEqual((winter["opens_lisbon"], winter["lisbon_ahead_hours"]), ("14:30", 5))
+        early = alerts.market_status(ny("2026-11-27 10:00"))    # 1:00 p.m. early close
+        self.assertEqual(early["closes_lisbon"], "18:00")
 
 
 class Quotes(unittest.TestCase):

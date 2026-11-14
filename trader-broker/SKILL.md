@@ -45,6 +45,17 @@ python3 "${CLAUDE_SKILL_DIR}/ticket.py" log
 is a real yes for that order, builds the flatten ticket, and keeps the log in
 `trader/state/broker.json`. `--now "2026-10-19 10:15"` pins the clock (New York time).
 
+
+## Language and time zone
+
+Reply in the user's language (European Portuguese for a user in Portugal),
+keeping tickers, order types and tool output as they are. The tools print New
+York time. For a user in Portugal, give the Lisbon time next to it; run
+`python3 "${CLAUDE_SKILL_DIR}/../trader-alerts/alerts.py" clock --json` (fields `now_lisbon`,
+`opens_lisbon`, `closes_lisbon`, `lisbon_ahead_hours`) rather than adding 5
+hours by hand, because for a few weeks in March and in late October and early
+November the gap is 4 hours.
+
 ## What it reads and writes
 
 | file | what |
@@ -123,6 +134,12 @@ ticket shows it. A bracket is whole shares only, with `time_in_force` day or
 gtc. After the entry fills, the stop-loss and the take-profit wait at the
 broker as two orders that cancel each other. They are day orders too, so they
 end at the close: one more reason to be flat by then.
+
+**Users in Portugal and the rest of the EEA.** Alpaca completed EEA
+passporting to 29 countries, Portugal included, in July 2026, so a resident of
+Portugal can apply for an account. Eligibility is Alpaca's decision: point the
+user to alpaca.markets to check, and keep paper trading as the start. Orders
+are in US dollars; Alpaca converts other currencies on deposit.
 
 ## Setup B: Interactive Brokers (connector in Claude's directory)
 

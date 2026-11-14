@@ -42,6 +42,17 @@ to read saved Yahoo files, `--no-write`, `--show N`, `--json`. Exit code 0
 when the scan found something, 1 when it found nothing or could not run (the
 reason is one plain line).
 
+
+## Language and time zone
+
+Reply in the user's language (European Portuguese for a user in Portugal),
+keeping tickers, order types and tool output as they are. The tools print New
+York time. For a user in Portugal, give the Lisbon time next to it; run
+`python3 "${CLAUDE_SKILL_DIR}/../trader-alerts/alerts.py" clock --json` (fields `now_lisbon`,
+`opens_lisbon`, `closes_lisbon`, `lisbon_ahead_hours`) rather than adding 5
+hours by hand, because for a few weeks in March and in late October and early
+November the gap is 4 hours.
+
 ## What it reads and writes
 
 | file | what |

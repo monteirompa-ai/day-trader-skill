@@ -57,7 +57,7 @@ import time
 import urllib.error
 import urllib.request
 
-UA = "Mozilla/5.0 (compatible; day-trader-skill/2.0; +https://github.com/Jakeschincariol/day-trader-skill)"
+UA = "Mozilla/5.0 (compatible; day-trader-skill/2.0; +https://github.com/monteirompa-ai/day-trader-skill)"
 PAUSE = 0.5    # seconds between requests: be polite to free endpoints
 BACKOFF = 2.0  # seconds to wait before the one retry after a 429
 YAHOO_HOSTS = ("query2.finance.yahoo.com", "query1.finance.yahoo.com")
@@ -131,6 +131,33 @@ def eastern_to_utc(local):
     return local + datetime.timedelta(hours=5)
 
 
+def _last_sunday(year, month):
+    d = datetime.date(year, month + 1, 1) - datetime.timedelta(days=1)
+    return d - datetime.timedelta(days=(d.weekday() + 1) % 7)
+
+
+def lisbon_offset(utc):
+    """Hours from UTC for Lisbon: +1 in summer time, 0 otherwise.
+    EU rule: from 01:00 UTC on the last Sunday of March to 01:00 UTC on the
+    last Sunday of October. The US switches on other dates, so for a few
+    weeks a year New York is 4 hours behind Lisbon, not 5."""
+    y = utc.year
+    start = datetime.datetime.combine(_last_sunday(y, 3), datetime.time(1, 0))
+    end = datetime.datetime.combine(_last_sunday(y, 10), datetime.time(1, 0))
+    naive = utc.replace(tzinfo=None)
+    return 1 if start <= naive < end else 0
+
+
+def to_lisbon(utc):
+    return utc.replace(tzinfo=None) + datetime.timedelta(hours=lisbon_offset(utc))
+
+
+def ny_to_lisbon(day, hhmm):
+    """'2026-10-19', '09:30' (New York) -> '14:30' (Lisbon, same moment)."""
+    local = datetime.datetime.strptime("%s %s" % (day, hhmm), "%Y-%m-%d %H:%M")
+    return to_lisbon(eastern_to_utc(local)).strftime("%H:%M")
+
+
 def parse_now(text):
     """ISO time -> naive UTC. A time without an offset is taken as New York time."""
     if not text:
@@ -181,11 +208,18 @@ def market_status(now_utc):
             st["reason"] = "before the open"
         else:
             st["reason"] = "after the close"
+    st["now_lisbon"] = to_lisbon(now_utc).strftime("%Y-%m-%d %H:%M")
+    gap = lisbon_offset(now_utc) - eastern_offset(now_utc)
+    st["lisbon_ahead_hours"] = gap
+    if s:
+        st["opens_lisbon"] = ny_to_lisbon(d.isoformat(), st["opens"])
+        st["closes_lisbon"] = ny_to_lisbon(d.isoformat(), st["closes"])
     # next open
     nd = d if (s and local.time() < s[0]) else d + datetime.timedelta(days=1)
     for _ in range(15):
         if session(nd):
             st["next_open"] = "%s 09:30" % nd.isoformat()
+            st["next_open_lisbon"] = "%s %s" % (nd.isoformat(), ny_to_lisbon(nd.isoformat(), "09:30"))
             break
         nd += datetime.timedelta(days=1)
     return st
@@ -552,8 +586,13 @@ def cmd_clock(a):
         if st.get("opens"):
             print("Today's session: %s to %s%s." % (st["opens"], st["closes"],
                                                     (" (early close: %s)" % st["early_close"]) if st.get("early_close") else ""))
+        print("Lisbon %s (Lisbon is %d hours ahead of New York today%s)." % (
+            st["now_lisbon"], st["lisbon_ahead_hours"],
+            "" if st["lisbon_ahead_hours"] == 5 else ", not the usual 5: the US and the EU change clocks on different dates"))
+        if st.get("opens_lisbon"):
+            print("Today's session in Lisbon time: %s to %s." % (st["opens_lisbon"], st["closes_lisbon"]))
         if not st["open"] and st.get("next_open"):
-            print("Next open: %s New York." % st["next_open"])
+            print("Next open: %s New York (%s Lisbon)." % (st["next_open"], st["next_open_lisbon"]))
         if not st["calendar_known"]:
             print("Holiday list covers %s only: check nyse.com for this date." % " and ".join(map(str, CALENDAR_YEARS)))
     return 0 if st["open"] else 1

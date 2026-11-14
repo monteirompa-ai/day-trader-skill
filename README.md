@@ -16,6 +16,20 @@ past day the same setup fired, and tells you the honest odds.
 And no trade goes through until you say yes. Nothing in this pack can place
 an order on its own. Paper trading is the default.
 
+> **Esta cópia (monteirompa-ai).** Adaptação do pacote original de Jake
+> Schincariol (MIT) para quem negoceia a partir de Portugal. O que mudou:
+> os links e a instalação apontam para este repositório; o relógio da NYSE
+> (`/trader-alerts`, `alerts.py clock`) mostra também a hora de Lisboa e
+> avisa nas semanas de março e de fim de outubro em que a diferença para Nova
+> Iorque é de 4 horas e não de 5; todas as skills respondem na língua do
+> utilizador e dão a hora de Lisboa ao lado da de Nova Iorque; e o
+> `/trader-broker` refere que a Alpaca passou a servir residentes do EEE,
+> Portugal incluído (julho de 2026). Os mercados continuam a ser os dos EUA.
+>
+> **Impostos em Portugal.** Nada aqui é aconselhamento fiscal. As mais-valias
+> com ações declaram-se no IRS (numa corretora estrangeira, no anexo J);
+> confirme as regras com um contabilista.
+
 > **Looking for the original Trader skill?** Copy an investor's 13F, the
 > stock screener, tax lots and rebalancing live in
 > [github.com/Jakeschincariol/trader-skill](https://github.com/Jakeschincariol/trader-skill).
@@ -26,7 +40,7 @@ an order on its own. Paper trading is the default.
 Paste this into Claude:
 
 ```
-https://github.com/Jakeschincariol/day-trader-skill
+https://github.com/monteirompa-ai/day-trader-skill
 
 install skill
 ```
@@ -34,7 +48,7 @@ install skill
 Or as a plugin, in Claude Code:
 
 ```
-/plugin marketplace add Jakeschincariol/day-trader-skill
+/plugin marketplace add monteirompa-ai/day-trader-skill
 /plugin install day-trader-skill@day-trader-skill
 ```
 
@@ -43,7 +57,7 @@ Claude Code namespaces plugin skills, so installed as a plugin they show up as
 plain `/trader-scanner`:
 
 ```bash
-git clone https://github.com/Jakeschincariol/day-trader-skill.git
+git clone https://github.com/monteirompa-ai/day-trader-skill.git
 cp -r day-trader-skill/trader-* ~/.claude/skills/
 ```
 
@@ -213,4 +227,4 @@ trader-pelosi/      SKILL.md, ptr.py
 tests/              unittest suite + offline fixtures
 ```
 
-MIT. Made by [Jake Schincariol](https://opusjake.ai).
+MIT. Made by [Jake Schincariol](https://opusjake.ai). Adapted for Portugal by monteirompa-ai.

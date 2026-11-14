@@ -44,6 +44,17 @@ python3 "${CLAUDE_SKILL_DIR}/alerts.py" reset tsla-plan-stop
 `--now "2026-10-19 15:55"` pins the clock (New York time); `--offline DIR`
 reads saved quote files instead of the network.
 
+
+## Language and time zone
+
+Reply in the user's language (European Portuguese for a user in Portugal),
+keeping tickers, order types and tool output as they are. The tools print New
+York time. For a user in Portugal, give the Lisbon time next to it; run
+`python3 "${CLAUDE_SKILL_DIR}/../trader-alerts/alerts.py" clock --json` (fields `now_lisbon`,
+`opens_lisbon`, `closes_lisbon`, `lisbon_ahead_hours`) rather than adding 5
+hours by hand, because for a few weeks in March and in late October and early
+November the gap is 4 hours.
+
 ## What it reads and writes
 
 | file | what |
@@ -96,6 +107,12 @@ on these holidays, from nyse.com/markets/hours-calendars (read 2026-10-13):
 - 2027: Jan 1, Jan 18, Feb 15, Mar 26 (Good Friday), May 31, Jun 18
   (Juneteenth observed), Jul 5 (Independence Day observed), Sep 6, Nov 25,
   Dec 24 (Christmas observed). Early close 1:00 p.m. on Nov 26.
+
+`clock` also prints the Lisbon time and today's session in Lisbon time (14:30
+to 21:00 most of the year, 13:30 to 20:00 in the weeks when the US and the EU
+are on different clocks; an early close at 1:00 p.m. is 18:00 in Lisbon). The
+EU rule (last Sunday of March to last Sunday of October, 01:00 UTC) is worked
+out in the tool too.
 
 Daylight saving time is worked out in the tool, so it needs no time zone
 files and ignores the computer's own zone. For any other year it says the
